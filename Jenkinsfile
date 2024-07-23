@@ -9,7 +9,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git 'https://github.com/your-repo.git'
+                git url: 'git@github.com:aazyablitsev/app-for-jenkins.git', branch: 'master', credentialsId: 'github-ssh-key'
             }
         }
         stage('Terraform Init') {
@@ -25,7 +25,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    docker.withRegistry('https://index.docker.io/v1/', 'DOCKER_CREDENTIALS') {
+                    docker.withRegistry('https://index.docker.io/v1/', 'docker-hub-credentials') {
                         docker.build('your-app').push('latest')
                     }
                 }
