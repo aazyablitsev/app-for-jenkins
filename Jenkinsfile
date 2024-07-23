@@ -1,0 +1,47 @@
+pipeline {
+    agent any
+
+    environment {
+        GOOGLE_APPLICATION_CREDENTIALS = credentials('gcp-service-account')
+        DOCKER_CREDENTIALS = credentials('docker-hub-credentials')
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git 'https://github.com/your-repo.git'
+            }
+        }
+        stage('Terraform Init') {
+            steps {
+                sh 'terraform init'
+            }
+        }
+        stage('Terraform Apply') {
+            steps {
+                sh 'terraform apply -auto-approve'
+            }
+        }
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    docker.withRegistry('https://index.docker.io/v1/', 'DOCKER_CREDENTIALS') {
+                        docker.build('your-app').push('latest')
+                    }
+                }
+            }
+        }
+        stage('Deploy with Docker Compose') {
+            steps {
+                sh 'scp -i /path/to/key docker-compose.yml your-user@${instance_ip}:/path/to/deploy'
+                sh 'ssh -i /path/to/key your-user@${instance_ip} "docker-compose -f /path/to/deploy/docker-compose.yml up -d"'
+            }
+        }
+    }
+
+    post {
+        always {
+            cleanWs()
+        }
+    }
+}

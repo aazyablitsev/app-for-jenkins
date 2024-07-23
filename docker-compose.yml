@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  web:
+    image: your-app:latest
+    ports:
+      - "80:80"
+    networks:
+      - webnet
+
+networks:
+  webnet:
