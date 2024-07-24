@@ -1,12 +1,30 @@
 pipeline {
     agent any
+    options {
+        timeout(time: 1, unit: 'HOURS')
+    }
     environment {
         GOOGLE_APPLICATION_CREDENTIALS = credentials('gcp-service-account')
     }
     stages {
+        stage('Prepare Workspace') {
+            steps {
+                cleanWs()
+            }
+        }
         stage('Checkout') {
             steps {
-                git url: 'https://github.com/aazyablitsev/app-for-jenkins.git', branch: 'master', credentialsId: 'github-token'
+                retry(3) {
+                    timeout(time: 5, unit: 'MINUTES') {
+                        checkout([$class: 'GitSCM', 
+                            branches: [[name: '*/master']], 
+                            userRemoteConfigs: [[
+                                url: 'https://github.com/aazyablitsev/app-for-jenkins.git', 
+                                credentialsId: 'github-token'
+                            ]]
+                        ])
+                    }
+                }
             }
         }
         stage('Set Docker Hub Username') {
