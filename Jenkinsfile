@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        GOOGLE_APPLICATION_CREDENTIALS = credentials('gcp-service-account')
+        GOOGLE_APPLICATION_CREDENTIALS = credentials('gcp-service-account-json')
         DOCKER_CREDENTIALS = credentials('docker-hub-credentials')
     }
 
@@ -15,14 +15,18 @@ pipeline {
         stage('Terraform Init') {
             steps {
                 dir('project') {
-                    sh 'terraform init'
+                    withCredentials([file(credentialsId: 'gcp-service-account-json', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
+                        sh 'terraform init'
+                    }
                 }
             }
         }
         stage('Terraform Apply') {
             steps {
                 dir('project') {
-                    sh 'terraform apply -auto-approve'
+                    withCredentials([file(credentialsId: 'gcp-service-account-json', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
+                        sh 'terraform apply -auto-approve'
+                    }
                 }
             }
         }
@@ -37,8 +41,11 @@ pipeline {
         }
         stage('Deploy with Docker Compose') {
             steps {
-                sh 'scp -i /path/to/key docker-compose.yml your-user@${instance_ip}:/path/to/deploy'
-                sh 'ssh -i /path/to/key your-user@${instance_ip} "docker-compose -f /path/to/deploy/docker-compose.yml up -d"'
+                script {
+                    def instanceIp = '34.89.101.117'
+                    sh 'scp -i /path/to/key docker-compose.yml your-user@' + instanceIp + ':/path/to/deploy'
+                    sh 'ssh -i /path/to/key your-user@' + instanceIp + ' "docker-compose -f /path/to/deploy/docker-compose.yml up -d"'
+                }
             }
         }
     }
