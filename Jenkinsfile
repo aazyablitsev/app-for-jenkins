@@ -2,38 +2,27 @@ pipeline {
     agent any
 
     environment {
-        GOOGLE_APPLICATION_CREDENTIALS = credentials('gcp-service-account-json')
+        GOOGLE_APPLICATION_CREDENTIALS = credentials('gcp-service-account')
         DOCKER_CREDENTIALS = credentials('docker-hub-credentials')
     }
 
     stages {
         stage('Checkout') {
             steps {
-                script {
-                    def gitUrl = 'https://github.com/aazyablitsev/app-for-jenkins.git'
-                    def branch = 'master'
-                    def credentialsId = 'github-token'
-                    retry(3) {
-                        sh "git clone ${gitUrl} --branch ${branch} --single-branch --depth 1"
-                    }
-                }
+                git url: 'https://github.com/aazyablitsev/app-for-jenkins.git', branch: 'master', credentialsId: 'github-token'
             }
         }
         stage('Terraform Init') {
             steps {
-                dir('app-for-jenkins/project') {
-                    withCredentials([file(credentialsId: 'gcp-service-account-json', variable: 'GOOGLE_APPLICATION_CREDENTIALS_PATH')]) {
-                        sh 'terraform init'
-                    }
+                dir('project') {
+                    sh 'terraform init'
                 }
             }
         }
         stage('Terraform Apply') {
             steps {
-                dir('app-for-jenkins/project') {
-                    withCredentials([file(credentialsId: 'gcp-service-account-json', variable: 'GOOGLE_APPLICATION_CREDENTIALS_PATH')]) {
-                        sh 'terraform apply -auto-approve'
-                    }
+                dir('project') {
+                    sh 'terraform apply -auto-approve'
                 }
             }
         }
@@ -60,5 +49,4 @@ pipeline {
         }
     }
 }
-
 
