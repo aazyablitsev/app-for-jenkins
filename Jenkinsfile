@@ -9,7 +9,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git url: 'git@github.com:aazyablitsev/app-for-jenkins.git', branch: 'master', credentialsId: 'github-ssh-key'
+                git url: 'https://github.com/aazyablitsev/app-for-jenkins.git', branch: 'master', credentialsId: 'github-credentials'
             }
         }
         stage('Terraform Init') {
