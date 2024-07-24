@@ -9,13 +9,24 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git url: 'https://github.com/aazyablitsev/app-for-jenkins.git', branch: 'master', credentialsId: 'github-token'
+                script {
+                    def gitUrl = 'https://github.com/aazyablitsev/app-for-jenkins.git'
+                    def branch = 'master'
+                    def credentialsId = 'github-token'
+                    retry(3) {
+                        checkout([
+                            $class: 'GitSCM', 
+                            branches: [[name: branch]],
+                            userRemoteConfigs: [[url: gitUrl, credentialsId: credentialsId]]
+                        ])
+                    }
+                }
             }
         }
         stage('Terraform Init') {
             steps {
                 dir('project') {
-                    withCredentials([file(credentialsId: 'gcp-service-account-json', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
+                    withCredentials([file(credentialsId: 'gcp-service-account-json', variable: 'GOOGLE_APPLICATION_CREDENTIALS_PATH')]) {
                         sh 'terraform init'
                     }
                 }
@@ -24,7 +35,7 @@ pipeline {
         stage('Terraform Apply') {
             steps {
                 dir('project') {
-                    withCredentials([file(credentialsId: 'gcp-service-account-json', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
+                    withCredentials([file(credentialsId: 'gcp-service-account-json', variable: 'GOOGLE_APPLICATION_CREDENTIALS_PATH')]) {
                         sh 'terraform apply -auto-approve'
                     }
                 }
