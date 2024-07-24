@@ -9,13 +9,13 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git url: 'https://github.com/aazyablitsev/app-for-jenkins.git', branch: 'master', credentialsId: 'github-credentials'
+                git url: 'git@github.com:aazyablitsev/app-for-jenkins.git', branch: 'master', credentialsId: 'github-ssh-key'
             }
         }
         stage('Terraform Init') {
             steps {
                 dir('project') {
-                    sh 'terraform init -backend-config="bucket=your-terraform-state-bucket" -backend-config="prefix=terraform/state"'
+                    sh 'terraform init'
                 }
             }
         }
