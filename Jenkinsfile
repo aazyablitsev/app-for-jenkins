@@ -15,7 +15,7 @@ pipeline {
         stage('Terraform Init') {
             steps {
                 dir('project') {
-                    sh 'terraform init'
+                    sh 'terraform init -backend-config="bucket=your-terraform-state-bucket" -backend-config="prefix=terraform/state"'
                 }
             }
         }
