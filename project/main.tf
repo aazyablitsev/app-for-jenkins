@@ -1,5 +1,5 @@
 provider "google" {
-  credentials = file("/home/ubuntu/.ssh/service-account-gcp.json")
+  credentials = file("/var/lib/jenkins/.ssh/service-account-gcp.json")
   project     = var.project_id
   region      = var.region
 }
