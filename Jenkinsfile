@@ -14,12 +14,16 @@ pipeline {
         }
         stage('Terraform Init') {
             steps {
-                sh 'terraform init'
+                dir('project') {
+                    sh 'terraform init'
+                }
             }
         }
         stage('Terraform Apply') {
             steps {
-                sh 'terraform apply -auto-approve'
+                dir('project') {
+                    sh 'terraform apply -auto-approve'
+                }
             }
         }
         stage('Build Docker Image') {
