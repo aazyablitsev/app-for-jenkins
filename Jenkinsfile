@@ -42,7 +42,7 @@ pipeline {
         stage('Deploy with Docker Compose') {
             steps {
                 script {
-                    def instanceIp = '34.89.101.117'
+                    def instanceIp = '34.89.101.117' // Убедитесь, что IP-адрес экземпляра корректен
                     sh 'scp -i /path/to/key docker-compose.yml your-user@' + instanceIp + ':/path/to/deploy'
                     sh 'ssh -i /path/to/key your-user@' + instanceIp + ' "docker-compose -f /path/to/deploy/docker-compose.yml up -d"'
                 }
