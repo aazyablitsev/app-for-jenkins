@@ -66,9 +66,12 @@ pipeline {
         }
         stage('Deploy with Docker Compose') {
             steps {
-                sshagent(['jenkins-ssh-key']) {
-                    sh "scp docker-compose.yml ubuntu@${env.INSTANCE_IP}:/home/ubuntu/"
-                    sh "ssh ubuntu@${env.INSTANCE_IP} 'docker-compose -f /home/ubuntu/docker-compose.yml up -d'"
+                script {
+                    def instanceIp = env.INSTANCE_IP
+                    sshagent(['jenkins-ssh-key']) {
+                        sh "scp -o StrictHostKeyChecking=no docker-compose.yml ubuntu@${instanceIp}:/home/ubuntu/"
+                        sh "ssh -o StrictHostKeyChecking=no ubuntu@${instanceIp} 'docker-compose -f /home/ubuntu/docker-compose.yml up -d'"
+                    }
                 }
             }
         }
