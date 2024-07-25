@@ -51,7 +51,7 @@ pipeline {
             steps {
                 script {
                     docker.withRegistry('https://index.docker.io/v1/', 'docker-hub-credentials') {
-                        def app = docker.build("${DOCKER_HUB_USERNAME}/your-app:${env.BUILD_NUMBER}")
+                        def app = docker.build("${DOCKER_HUB_USERNAME}/nginx-app:${env.BUILD_NUMBER}")
                         app.push()
                         app.push('latest')
                     }
