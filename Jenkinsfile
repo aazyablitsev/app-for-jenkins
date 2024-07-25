@@ -71,7 +71,6 @@ pipeline {
                     def instanceIp = env.INSTANCE_IP
                     sshagent(['jenkins-ssh-key']) {
                         sh "scp -o StrictHostKeyChecking=no docker-compose.yml aazyablicev@${instanceIp}:/home/aazyablicev/"
-                        sh "ssh -o StrictHostKeyChecking=no aazyablicev@${instanceIp} 'docker login -u ${env.DOCKER_HUB_USERNAME} -p ${env.DOCKER_HUB_PASSWORD}'"
                         sh "ssh -o StrictHostKeyChecking=no aazyablicev@${instanceIp} 'docker-compose -f /home/aazyablicev/docker-compose.yml up -d'"
                     }
                 }
