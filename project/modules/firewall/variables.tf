@@ -9,7 +9,7 @@ variable "network_name" {
 variable "ports" {
   description = "List of allowed ports"
   type        = list(string)
-  default     = ["80", "443"]
+  default     = ["22", "80", "443"]
 }
 
 variable "source_ranges" {
