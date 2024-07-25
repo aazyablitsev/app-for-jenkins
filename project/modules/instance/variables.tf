@@ -13,7 +13,7 @@ variable "zone" {
 
 variable "image" {
   description = "The image to use for the instance"
-  default     = "debian-cloud/debian-11"
+  default     = "ubuntu-os-cloud/ubuntu-2004-lts"
 }
 
 variable "network_name" {
