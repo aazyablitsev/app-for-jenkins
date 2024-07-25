@@ -17,7 +17,7 @@ module "firewall" {
 
 module "instance" {
   source         = "./modules/instance"
-  instance_name  = "example-instance"
+  instance_name  = "instance"
   zone           = var.zone
   network_name   = module.network.network_name
   startup_script = file("${path.module}/scripts/startup.sh")
