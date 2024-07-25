@@ -1,15 +1,39 @@
 pipeline {
     agent any
-
+    options {
+        timeout(time: 1, unit: 'HOURS')
+    }
     environment {
         GOOGLE_APPLICATION_CREDENTIALS = credentials('gcp-service-account')
-        DOCKER_CREDENTIALS = credentials('docker-hub-credentials')
     }
-
     stages {
+        stage('Prepare Workspace') {
+            steps {
+                cleanWs()
+            }
+        }
         stage('Checkout') {
             steps {
-                git url: 'https://github.com/aazyablitsev/app-for-jenkins.git', branch: 'master', credentialsId: 'github-token'
+                retry(3) {
+                    timeout(time: 5, unit: 'MINUTES') {
+                        checkout([$class: 'GitSCM', 
+                            branches: [[name: '*/master']], 
+                            userRemoteConfigs: [[
+                                url: 'https://github.com/aazyablitsev/app-for-jenkins.git', 
+                                credentialsId: 'github-token'
+                            ]]
+                        ])
+                    }
+                }
+            }
+        }
+        stage('Set Docker Hub Username') {
+            steps {
+                script {
+                    withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'DOCKER_HUB_USERNAME', passwordVariable: 'DOCKER_HUB_PASSWORD')]) {
+                        env.DOCKER_HUB_USERNAME = DOCKER_HUB_USERNAME
+                    }
+                }
             }
         }
         stage('Terraform Init') {
@@ -23,26 +47,32 @@ pipeline {
             steps {
                 dir('project') {
                     sh 'terraform apply -auto-approve'
+                    script {
+                        env.INSTANCE_IP = sh(script: 'terraform output -raw instance_ip', returnStdout: true).trim()
+                    }
                 }
             }
         }
-        stage('Build Docker Image') {
+        stage('Build and Push Docker Image') {
             steps {
                 script {
-                    docker.withRegistry('https://index.docker.io/v1/', 'DOCKER_CREDENTIALS') {
-                        docker.build('your-app').push('latest')
+                    docker.withRegistry('https://index.docker.io/v1/', 'docker-hub-credentials') {
+                        def app = docker.build("${env.DOCKER_HUB_USERNAME}/your-app:${env.BUILD_NUMBER}")
+                        app.push()
+                        app.push('latest')
                     }
                 }
             }
         }
         stage('Deploy with Docker Compose') {
             steps {
-                sh 'scp -i /path/to/key docker-compose.yml your-user@${instance_ip}:/path/to/deploy'
-                sh 'ssh -i /path/to/key your-user@${instance_ip} "docker-compose -f /path/to/deploy/docker-compose.yml up -d"'
+                sshagent(['jenkins-ssh-key']) {
+                    sh "scp docker-compose.yml ubuntu@${env.INSTANCE_IP}:/home/ubuntu/"
+                    sh "ssh ubuntu@${env.INSTANCE_IP} 'docker-compose -f /home/ubuntu/docker-compose.yml up -d'"
+                }
             }
         }
     }
-
     post {
         always {
             cleanWs()
