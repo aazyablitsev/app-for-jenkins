@@ -5,6 +5,7 @@ pipeline {
     }
     environment {
         GOOGLE_APPLICATION_CREDENTIALS = credentials('gcp-service-account')
+        DOCKER_HUB_CREDENTIALS = credentials('docker-hub-credentials')
     }
     stages {
         stage('Prepare Workspace') {
@@ -30,23 +31,15 @@ pipeline {
         stage('Set Docker Hub Username') {
             steps {
                 script {
-                    withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'DOCKER_HUB_USERNAME', passwordVariable: 'DOCKER_HUB_PASSWORD')]) {
-                        env.DOCKER_HUB_USERNAME = DOCKER_HUB_USERNAME
-                        env.DOCKER_HUB_PASSWORD = DOCKER_HUB_PASSWORD
-                    }
+                    env.DOCKER_HUB_USERNAME = DOCKER_HUB_CREDENTIALS_USR
+                    env.DOCKER_HUB_PASSWORD = DOCKER_HUB_CREDENTIALS_PSW
                 }
             }
         }
-        stage('Terraform Init') {
+        stage('Terraform Init and Apply') {
             steps {
                 dir('project') {
                     sh 'terraform init'
-                }
-            }
-        }
-        stage('Terraform Apply') {
-            steps {
-                dir('project') {
                     sh 'terraform apply -auto-approve'
                     script {
                         env.INSTANCE_IP = sh(script: 'terraform output -raw instance_ip', returnStdout: true).trim()
@@ -58,7 +51,7 @@ pipeline {
             steps {
                 script {
                     docker.withRegistry('https://index.docker.io/v1/', 'docker-hub-credentials') {
-                        def app = docker.build("${env.DOCKER_HUB_USERNAME}/your-app:${env.BUILD_NUMBER}")
+                        def app = docker.build("${DOCKER_HUB_USERNAME}/your-app:${env.BUILD_NUMBER}")
                         app.push()
                         app.push('latest')
                     }
@@ -68,10 +61,9 @@ pipeline {
         stage('Deploy with Docker Compose') {
             steps {
                 script {
-                    def instanceIp = env.INSTANCE_IP
                     sshagent(['jenkins-ssh-key']) {
-                        sh "scp -o StrictHostKeyChecking=no docker-compose.yml aazyablicev@${instanceIp}:/home/aazyablicev/"
-                        sh "ssh -o StrictHostKeyChecking=no aazyablicev@${instanceIp} 'docker-compose -f /home/aazyablicev/docker-compose.yml up -d'"
+                        sh "scp -o StrictHostKeyChecking=no docker-compose.yml aazyablicev@${INSTANCE_IP}:/home/aazyablicev/"
+                        sh "ssh -o StrictHostKeyChecking=no aazyablicev@${INSTANCE_IP} 'docker-compose -f /home/aazyablicev/docker-compose.yml up -d'"
                     }
                 }
             }
