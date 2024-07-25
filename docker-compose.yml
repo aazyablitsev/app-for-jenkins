@@ -2,7 +2,7 @@ version: '3.3'
 
 services:
   web:
-    image: your-app:latest
+    image: aazyablitsev/your-app:latest
     ports:
       - "80:80"
     networks:
