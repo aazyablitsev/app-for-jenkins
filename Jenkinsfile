@@ -23,6 +23,10 @@ pipeline {
             steps {
                 retry(3) {
                     timeout(time: 5, unit: 'MINUTES') {
+                        script {
+                            sh 'mkdir -p ~/.ssh'
+                            sh 'ssh-keyscan github.com >> ~/.ssh/known_hosts'
+                        }
                         sshagent(['github-ssh-key']) {
                             checkout([$class: 'GitSCM', 
                                 branches: [[name: '*/master']], 
