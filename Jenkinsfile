@@ -23,13 +23,15 @@ pipeline {
             steps {
                 retry(3) {
                     timeout(time: 5, unit: 'MINUTES') {
-                        checkout([$class: 'GitSCM', 
-                            branches: [[name: '*/master']], 
-                            userRemoteConfigs: [[
-                                url: 'https://github.com/aazyablitsev/app-for-jenkins.git', 
-                                credentialsId: 'github-token'
-                            ]]
-                        ])
+                        sshagent(['github-ssh-key']) {
+                            checkout([$class: 'GitSCM', 
+                                branches: [[name: '*/master']], 
+                                userRemoteConfigs: [[
+                                    url: 'git@github.com:aazyablitsev/app-for-jenkins.git', 
+                                    credentialsId: 'github-ssh-key'
+                                ]]
+                            ])
+                        }
                     }
                 }
             }
