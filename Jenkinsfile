@@ -8,6 +8,12 @@ pipeline {
         DOCKER_HUB_CREDENTIALS = credentials('docker-hub-credentials')
     }
     stages {
+        stage('Clean Terraform State') {
+            steps {
+                sh 'rm -rf $WORKSPACE/.terraform $WORKSPACE/terraform.tfstate $WORKSPACE/terraform.tfstate.backup'
+                sh 'gsutil rm -r gs://my-terraform-bucket/terraform/state || true'
+            }
+        }
         stage('Prepare Workspace') {
             steps {
                 cleanWs()
