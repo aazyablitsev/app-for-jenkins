@@ -36,6 +36,13 @@ pipeline {
                 }
             }
         }
+        stage('Add SSH Host to Known Hosts') {
+            steps {
+                script {
+                    sh "ssh-keyscan -H 34.105.216.233 >> ~/.ssh/known_hosts"
+                }
+            }
+        }
         stage('Terraform Init and Apply') {
             steps {
                 dir('project') {
@@ -63,7 +70,6 @@ pipeline {
                 script {
                     sshagent(['jenkins-ssh-key']) {
                         sh "ssh -o StrictHostKeyChecking=no aazyablicev@${INSTANCE_IP} 'docker-compose down'"
-                        sh "ssh -o StrictHostKeyChecking=no aazyablicev@${INSTANCE_IP} 'mkdir -p /home/aazyablicev/website'"
                         sh "scp -o StrictHostKeyChecking=no docker-compose.yml aazyablicev@${INSTANCE_IP}:/home/aazyablicev/"
                         sh "scp -o StrictHostKeyChecking=no website/nginx.conf aazyablicev@${INSTANCE_IP}:/home/aazyablicev/website/"
                         sh "ssh -o StrictHostKeyChecking=no aazyablicev@${INSTANCE_IP} 'docker-compose up -d'"
@@ -78,5 +84,6 @@ pipeline {
         }
     }
 }
+
 
 
