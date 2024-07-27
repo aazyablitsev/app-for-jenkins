@@ -36,13 +36,6 @@ pipeline {
                 }
             }
         }
-        stage('Add SSH Host to Known Hosts') {
-            steps {
-                script {
-                    sh "ssh-keyscan -H 34.105.216.233 >> ~/.ssh/known_hosts"
-                }
-            }
-        }
         stage('Terraform Init and Apply') {
             steps {
                 dir('project') {
