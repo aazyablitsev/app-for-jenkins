@@ -62,7 +62,8 @@ pipeline {
             steps {
                 script {
                     sshagent(['jenkins-ssh-key']) {
-                        sh "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null aazyablicev@${INSTANCE_IP} 'docker-compose down'"
+                        sh "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null aazyablicev@${INSTANCE_IP} 'mkdir -p /home/aazyablicev/website'"
+                        sh "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null aazyablicev@${INSTANCE_IP} 'docker-compose down || true'"
                         sh "scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null docker-compose.yml aazyablicev@${INSTANCE_IP}:/home/aazyablicev/"
                         sh "scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null website/nginx.conf aazyablicev@${INSTANCE_IP}:/home/aazyablicev/website/"
                         sh "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null aazyablicev@${INSTANCE_IP} 'docker-compose up -d'"
