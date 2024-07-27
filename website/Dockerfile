@@ -1,3 +1,5 @@
 FROM nginx:alpine
-COPY . /usr/share/nginx/html
+COPY index.html /usr/share/nginx/html/index.html
+COPY styles.css /usr/share/nginx/html/styles.css
+COPY images/nature.jpg /usr/share/nginx/html/images/nature.jpg
 COPY nginx.conf /etc/nginx/nginx.conf
