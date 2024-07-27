@@ -28,7 +28,7 @@ pipeline {
                 }
             }
         }
-        stage('Set Docker Hub Username') {
+        stage('Set Docker Hub Credentials') {
             steps {
                 script {
                     env.DOCKER_HUB_USERNAME = DOCKER_HUB_CREDENTIALS_USR
@@ -51,7 +51,7 @@ pipeline {
             steps {
                 script {
                     docker.withRegistry('https://index.docker.io/v1/', 'docker-hub-credentials') {
-                        def app = docker.build("${DOCKER_HUB_USERNAME}/nginx-app:${env.BUILD_NUMBER}")
+                        def app = docker.build("${DOCKER_HUB_USERNAME}/nginx-app:${env.BUILD_NUMBER}", './website')
                         app.push()
                         app.push('latest')
                     }
