@@ -1,6 +1,16 @@
+version: '3.8'
+
 services:
   web:
     image: aazyablitsev/nginx-app:latest
+    deploy:
+      mode: replicated
+      replicas: 3
+      update_config:
+        parallelism: 2
+        delay: 10s
+      restart_policy:
+        condition: on-failure
     ports:
       - "80:80"
     networks:
