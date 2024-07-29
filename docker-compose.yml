@@ -1,4 +1,7 @@
-services: web:
+version: '3.8'
+
+services:
+  web:
     image: aazyablitsev/nginx-app:latest
     ports:
       - "80:80"
