@@ -4,11 +4,7 @@ services:
   web:
     image: aazyablitsev/nginx-app:latest
     deploy:
-      mode: replicated
       replicas: 3
-      update_config:
-        parallelism: 2
-        delay: 10s
       restart_policy:
         condition: on-failure
     networks:
@@ -27,4 +23,4 @@ services:
 
 networks:
   webnet:
-    driver: overlay
+    driver: bridge
