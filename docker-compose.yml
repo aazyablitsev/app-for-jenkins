@@ -1,28 +1,9 @@
-version: '3.8'
-
-services:
-  web:
+services: web:
     image: aazyablitsev/nginx-app:latest
-    deploy:
-      mode: replicated
-      replicas: 3
-      restart_policy:
-        condition: on-failure
-    networks:
-      - webnet
-
-  nginx:
-    image: nginx:latest
     ports:
       - "80:80"
-    volumes:
-      - /home/aazyablicev/nginx.conf:/etc/nginx/nginx.conf
-    depends_on:
-      - web
     networks:
       - webnet
 
 networks:
   webnet:
-    driver: overlay
-
