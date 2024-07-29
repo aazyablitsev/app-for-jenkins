@@ -11,10 +11,20 @@ services:
         delay: 10s
       restart_policy:
         condition: on-failure
+    networks:
+      - webnet
+
+  nginx:
+    image: nginx:latest
     ports:
       - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - web
     networks:
       - webnet
 
 networks:
   webnet:
+    driver: overlay
